@@ -17,13 +17,26 @@ class SearchPresenter: SearchPresentationLogic {
     
     func presentData(response: Search.Model.Response.ResponseType) {
         switch  response {
- 
         case .some:
             print("Presenter .some")
-        case .presentTracks:
+        case .presentTracks(let results):
+            let cells = results?.results.map({ (track) in
+                cellViewModel(from: track)
+            }) ?? []
+            
+            let searchViewModel = SearchViewModel.init(cells: cells)
             print("Presenter .presentTracks")
-            viewController?.displayData(viewModel: Search.Model.ViewModel.ViewModelData.displayTracks)
+            
+            viewController?.displayData(viewModel: Search.Model.ViewModel.ViewModelData.displayTracks(searchViewModel: searchViewModel))
         }
+    }
+    
+    private func cellViewModel(from track: Track) -> SearchViewModel.Cell {
+        return SearchViewModel.Cell.init(iconUrlString: track.artworkUrl100,
+                                         trackName: track.trackName,
+                                         collectionName: track.collectionName ?? "",
+                                         artistName: track.artistName,
+                                         previewUrl: track.previewUrl)
     }
     
 }
