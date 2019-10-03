@@ -8,16 +8,26 @@
 
 import UIKit
 
+protocol MainTabBarControllerDelegate: class {
+    func minimazeTrackDetailController()
+    func maximazeTrackDetailController(viewModel: SearchViewModel.Cell?)
+}
+
 class MainTabBarController: UITabBarController {
+    
+    private let searchViewController: SearchViewController = SearchViewController.loadFromStoryboard()
+    let trackDetailView: TrackDetailView = TrackDetailView.loadFromNib()
+    
+    private var minTopAnchorConstraints: NSLayoutConstraint!
+    private var maxTopAnchorConstraints: NSLayoutConstraint!
+    private var bottomAnchorConstraints: NSLayoutConstraint!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.backgroundColor = .white
-        
         tabBar.tintColor = #colorLiteral(red: 1, green: 0, blue: 0.3764705882, alpha: 1)
         
-        let searchViewController: SearchViewController = SearchViewController.loadFromStoryboard()
+        setupTrackDetailView()
+        searchViewController.tabBarDelegate = self
         
         viewControllers = [
             generateViewController(rootViewController: searchViewController, image: #imageLiteral(resourceName: "search"), title: "Search"),
@@ -33,5 +43,72 @@ class MainTabBarController: UITabBarController {
         navigationVC.navigationBar.prefersLargeTitles = true
         return navigationVC
     }
+    
+    private func setupTrackDetailView() {
+        print("setuptrackdetailview")
+        
+        trackDetailView.tabBarDelegate = self
+        trackDetailView.delegate = searchViewController
+        view.insertSubview(trackDetailView, belowSubview: tabBar)
+        
+        // use autolayout
+        trackDetailView.translatesAutoresizingMaskIntoConstraints = false
+        
+        maxTopAnchorConstraints = trackDetailView.topAnchor.constraint(equalTo: view.topAnchor, constant: view.frame.height)
+        minTopAnchorConstraints = trackDetailView.topAnchor.constraint(equalTo: tabBar.topAnchor, constant: -64)
+        bottomAnchorConstraints = trackDetailView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: view.frame.height)
+        bottomAnchorConstraints.isActive = true
+        maxTopAnchorConstraints.isActive = true
+        
+        trackDetailView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        trackDetailView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        
+    }
+    
+}
+
+extension MainTabBarController: MainTabBarControllerDelegate {
+    
+    func maximazeTrackDetailController(viewModel: SearchViewModel.Cell?) {
+        
+        maxTopAnchorConstraints.isActive = true
+        minTopAnchorConstraints.isActive = false
+        maxTopAnchorConstraints.constant = 0
+        bottomAnchorConstraints.constant = 0
+        
+        UIView.animate(withDuration: 0.5,
+                       delay: 0,
+                       usingSpringWithDamping: 0.7,
+                       initialSpringVelocity: 1,
+                       options: .curveEaseOut, animations: {
+                        self.view.layoutIfNeeded()
+                        self.tabBar.isHidden = true
+                        self.trackDetailView.miniTrackView.isHidden = true
+                        self.trackDetailView.maxStackView.isHidden = false
+        },
+                       completion: nil)
+        guard let viewModel = viewModel else { return }
+        self.trackDetailView.set(viewModel: viewModel)
+    }
+    
+    func minimazeTrackDetailController() {
+        
+        maxTopAnchorConstraints.isActive = false
+        bottomAnchorConstraints.constant = view.frame.height
+        minTopAnchorConstraints.isActive = true
+        
+        UIView.animate(withDuration: 0.5,
+                       delay: 0,
+                       usingSpringWithDamping: 0.7,
+                       initialSpringVelocity: 1,
+                       options: .curveEaseOut, animations: {
+                        self.view.layoutIfNeeded()
+                        self.tabBar.isHidden = false
+                        self.trackDetailView.miniTrackView.isHidden = false
+                        self.trackDetailView.maxStackView.isHidden = true
+        },
+                       completion: nil)
+    }
+    
     
 }
