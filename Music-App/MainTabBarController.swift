@@ -71,8 +71,8 @@ extension MainTabBarController: MainTabBarControllerDelegate {
     
     func maximazeTrackDetailController(viewModel: SearchViewModel.Cell?) {
         
-        maxTopAnchorConstraints.isActive = true
         minTopAnchorConstraints.isActive = false
+        maxTopAnchorConstraints.isActive = true
         maxTopAnchorConstraints.constant = 0
         bottomAnchorConstraints.constant = 0
         
@@ -82,9 +82,9 @@ extension MainTabBarController: MainTabBarControllerDelegate {
                        initialSpringVelocity: 1,
                        options: .curveEaseOut, animations: {
                         self.view.layoutIfNeeded()
-                        self.tabBar.isHidden = true
-                        self.trackDetailView.miniTrackView.isHidden = true
-                        self.trackDetailView.maxStackView.isHidden = false
+                        self.tabBar.alpha = 0
+                        self.trackDetailView.miniTrackView.alpha = 0
+                        self.trackDetailView.maxStackView.alpha = 1
         },
                        completion: nil)
         guard let viewModel = viewModel else { return }
@@ -103,9 +103,9 @@ extension MainTabBarController: MainTabBarControllerDelegate {
                        initialSpringVelocity: 1,
                        options: .curveEaseOut, animations: {
                         self.view.layoutIfNeeded()
-                        self.tabBar.isHidden = false
-                        self.trackDetailView.miniTrackView.isHidden = false
-                        self.trackDetailView.maxStackView.isHidden = true
+                        self.tabBar.alpha = 1
+                        self.trackDetailView.miniTrackView.alpha = 1
+                        self.trackDetailView.maxStackView.alpha = 0
         },
                        completion: nil)
     }
